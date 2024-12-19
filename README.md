@@ -44,20 +44,5 @@ export class UsersController {
   findUsers(
     @FilteringParams(['username', 'email']) filters: Filtering[],
     @SortingParams(['createdAt']) sort: Sorting | null
-  ) {
-    // `filters` is now an array of filtering conditions, e.g.:
-    // [{ property: 'username', rule: 'eq', value: 'john_doe' }]
-    //
-    // `sort` might be { property: 'createdAt', direction: 'asc' } or null if none provided.
-    // Apply filters and sorting to your TypeORM query, for example:
-    // let query = this.userRepository.createQueryBuilder('user');
-    // filters.forEach(filter => {
-    //   // Apply filter logic here
-    // });
-    // if (sort) {
-    //   query.addOrderBy(`user.${sort.property}`, sort.direction.toUpperCase());
-    // }
-    // return query.getMany();
-  }
-}
+  ) {}
 ```

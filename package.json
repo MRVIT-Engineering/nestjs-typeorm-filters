@@ -1,8 +1,8 @@
 {
-  "name": "@mrv/nestjs-typeorm-filters",
-  "version": "0.0.1",
+  "name": "@mrvlabs/nestjs-typeorm-filters",
+  "version": "1.0.0",
   "description": "Utility decorators for appying complex filtering & sorting to Typeorm queries.",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"

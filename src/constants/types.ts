@@ -8,3 +8,10 @@ export interface Sorting {
   property: string;
   direction: string;
 }
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  size: number;
+  offset: number;
+}
