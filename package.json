@@ -3,6 +3,16 @@
   "version": "1.0.4",
   "description": "Utility decorators for appying complex filtering & sorting to Typeorm queries.",
   "main": "./dist/index.js",
+  "keywords": [
+    "nestjs",
+    "typeorm",
+    "filters",
+    "decorators",
+    "sorting",
+    "filtering",
+    "query",
+    "params"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc"

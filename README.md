@@ -38,6 +38,8 @@ import { Filtering, Sorting, FilteringParams, SortingParams, getWhere, getOrder 
 
 2. Apply in the Controller
 
+- Make sure you add all the columns you want to `filter` by in the arrat param of the `FilteringParams` decorator.
+
 ```typescript
 @Controller('users')
 export class UsersController {
@@ -85,6 +87,44 @@ export class UserService {
 The `FilteringParams` and `SortingParams` decorators will validate and parse the query parameters into structured filter conditions and sorting configuration.
 
 The `getWhere` and `getOrder` functions will build the where condition and order configuration for TypeORM queries.
+
+When you want to apply query filters you need to add the `filter` query param in your HTTP request. The value of the param should be a string in the following format:
+
+```bash
+ENTITY_COLUMN:FILTER_RULE:FILTER_VALUE
+```
+
+To use `multiple` filtering values you can chain the `filter` query param on the HTTP request like this.
+
+```bash
+?filter=firstName:like:Rares&filter=id:eq:2
+```
+
+So if we take the last example, the return value from `getWhere` would be a TypeORM find [options object](https://orkhan.gitbook.io/typeorm/docs/find-options) like this
+
+```typescript
+ {
+  firstName: FindOperator {
+    '@instanceof': Symbol(FindOperator),
+    _type: 'ilike',
+    _value: '%Rares%',
+    _useParameter: true,
+    _multipleParameters: false,
+    _getSql: undefined,
+    _objectLiteralParameters: undefined
+  },
+  id: 2
+}
+```
+
+So all you have to do to apply the filters using TypeORM [repository pattern](https://typeorm.io/working-with-repository) like this:
+
+```ts
+fetch(filters: Filtering[]) {
+  const where = getWhere(filters);
+  return this.userRepository.find({ where })
+}
+```
 
 Here are some examples of how to build the query parameters:
 
