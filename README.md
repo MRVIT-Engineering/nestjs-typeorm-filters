@@ -109,18 +109,51 @@ Here are some examples of how to build the query parameters:
 
 The following rules are supported (as defined in the FilterRule enum):
 
-- eq (equals)
-- neq (not equals)
-- gt (greater than)
-- gte (greater than or equal)
-- lt (less than)
-- lte (less than or equal)
-- like (SQL LIKE)
-- nlike (SQL NOT LIKE)
-- in (SQL IN)
-- nin (SQL NOT IN)
-- isnull (SQL IS NULL)
-- isnotnull (SQL IS NOT NULL)
+- `eq` (equals)
+- `neq` (not equals)
+- `gt` (greater than)
+- `gte` (greater than or equal)
+- `lt` (less than)
+- `lte` (less than or equal)
+- `like` (SQL LIKE)
+- `nlike` (SQL NOT LIKE)
+- `in` (SQL IN)
+- `nin` (SQL NOT IN)
+- `isnull` (SQL IS NULL)
+- `isnotnull` (SQL IS NOT NULL)
+
+You should make sure that your `client` applications build the URL queries with this `rules` as a standard. So for example you can create a utility method like the one in the example below to construct query params for the HTTP request:
+
+```typescript
+import { Filter } from '@/constants/types';
+
+/**
+ * Utility function to build query parameters for API filters
+ *
+ * @param filters - Array of filtering objects with property, rule, and value
+ * @returns An object representing the query parameters for the filters
+ */
+export const buildFilterQueryParams = (filters: Filter[]): Record<string, string[]> => {
+  const params: Record<string, string[]> = {
+    filter: [],
+  };
+
+  filters.forEach((filter) => {
+    let value: string;
+
+    if (Array.isArray(filter.value)) {
+      value = filter.value.join(',');
+    } else {
+      value = String(filter.value);
+    }
+
+    // Construct the filter parameter in the format 'property:rule:value'
+    params.filter.push(`${filter.property}:${filter.rule}:${value}`);
+  });
+
+  return params;
+};
+```
 
 <br />
 
