@@ -8,6 +8,7 @@ This will provide a standardized way to handle filtering and sorting using TypeO
 
 - **FilteringParams**: Validate and parse filter query parameters into structured filter conditions for TypeORM queries.
 - **SortingParams**: Validate and parse sort query parameters into a sorting configuration for TypeORM queries.
+- **PaginationParams**: Validate and parse pagination parameters to handle offset-based pagination.
 - Built-in validation to ensure only whitelisted properties are used for filtering/sorting.
   Throws BadRequestException on invalid input.
 
@@ -33,7 +34,16 @@ yarn add @mrv/nestjs-typeorm-filters
 
 ```typescript
 import { Controller, Get } from '@nestjs/common';
-import { Filtering, Sorting, FilteringParams, SortingParams, getWhere, getOrder } from '@mrv/nestjs-typeorm-filters';
+import {
+  Filtering,
+  Sorting,
+  Pagination,
+  FilteringParams,
+  SortingParams,
+  PaginationParams,
+  getWhere,
+  getOrder,
+} from '@mrv/nestjs-typeorm-filters';
 ```
 
 2. Apply in the Controller
@@ -46,15 +56,19 @@ export class UsersController {
   @Get()
   findUsers(
     @FilteringParams(['username', 'email']) filters: Filtering[],
-    @SortingParams(['createdAt']) sort: Sorting | null
+    @SortingParams(['createdAt']) sort: Sorting | null,
+    @PaginationParams() pagination: Pagination
   ) {
     const whereCondition = getWhere(filters);
     const order = getOrder(sort);
 
-    console.log('whereCondition', whereCondition);
-    console.log('order', order);
-
-    // Use query conditions to fetch data using TypeORM
+    // Use TypeORM's repository pattern with pagination
+    return this.userRepository.find({
+      where: whereCondition,
+      order: order,
+      skip: pagination.offset,
+      take: pagination.limit,
+    });
   }
 }
 ```
@@ -139,11 +153,15 @@ Here are some examples of how to build the query parameters:
   - `GET` /users?sort=createdAt:asc
   - `GET` /users?sort=createdAt:desc
 
-- **Multiple filters can be applied** by providing multiple filter query parameters:
+- **Pagination**:
 
-  - `GET` /users?filter=username:eq:john_doe&filter=email:like:%example%
+  - `GET` /users?page=0&size=10 (first page, 10 items per page)
+  - `GET` /users?page=1&size=25 (second page, 25 items per page)
 
-  <br/>
+- **Combined Usage**:
+  - `GET` /users?filter=username:eq:john_doe&sort=createdAt:desc&page=0&size=10
+
+<br/>
 
 ## Supported Filter Rules
 
@@ -217,5 +235,42 @@ Copy code
 interface Sorting {
   property: string;
   direction: 'asc' | 'desc';
+}
+```
+
+- Pagination:
+
+```typescript
+interface Pagination {
+  page: number; // Current page number (0-based)
+  limit: number; // Number of items per page
+  size: number; // Same as limit
+  offset: number; // Calculated offset (page * limit)
+}
+```
+
+## Pagination Details
+
+The `PaginationParams` decorator provides offset-based pagination functionality:
+
+- **Parameters**:
+
+  - `page`: Zero-based page number (e.g., 0 for first page, 1 for second page)
+  - `size`: Number of items per page
+
+- **Validation**:
+
+  - Both `page` and `size` must be non-negative numbers
+  - Invalid values will throw a `BadRequestException`
+
+- **Usage Example**:
+
+```typescript
+@Get()
+async findAll(@PaginationParams() pagination: Pagination) {
+  return this.repository.find({
+    skip: pagination.offset,
+    take: pagination.limit,
+  });
 }
 ```
